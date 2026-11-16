@@ -1,0 +1,59 @@
+{
+  "manifest_version": "1.0.0",
+  "county": "Nairobi City County (047)",
+  "country": "Kenya",
+  "srid": 4326,
+  "sources": [
+    {
+      "id": "ds-ms-kenya",
+      "name": "Microsoft Kenya Building Footprints",
+      "publisher": "Microsoft Maps / Bing Imagery Team",
+      "url": "https://github.com/microsoft/KenyaNigeriaBuildingFootprints",
+      "licence": "ODbL v1.0",
+      "licence_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "status": "registered"
+    },
+    {
+      "id": "ds-google-openbldg",
+      "name": "Google Open Buildings Temporal (v3)",
+      "publisher": "Google Research",
+      "url": "https://sites.research.google/gr/open-buildings/temporal",
+      "licence": "CC BY 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+      "status": "registered"
+    },
+    {
+      "id": "ds-osm-kenya",
+      "name": "OpenStreetMap Geofabrik Kenya Extract",
+      "publisher": "OpenStreetMap Contributors / Geofabrik GmbH",
+      "url": "https://download.geofabrik.de/africa/kenya.html",
+      "licence": "ODbL",
+      "licence_url": "https://opendatacommons.org/licenses/odbl/",
+      "status": "registered"
+    },
+    {
+      "id": "ds-copernicus-dem",
+      "name": "Copernicus Digital Elevation Model (COP-DEM 30m)",
+      "publisher": "European Space Agency (ESA) / Airbus",
+      "url": "https://dataspace.copernicus.eu/",
+      "licence": "Copernicus Open Access Licence",
+      "status": "registered"
+    },
+    {
+      "id": "ds-chirps-precip",
+      "name": "CHIRPS High-Resolution Rainfall Dataset (v3.0)",
+      "publisher": "Climate Hazards Center (UCSB)",
+      "url": "https://www.chc.ucsb.edu/data/chirps3",
+      "licence": "Public Domain / Open Access",
+      "status": "registered"
+    },
+    {
+      "id": "ds-nca-audits",
+      "name": "National Construction Authority Inspection Registers",
+      "publisher": "National Construction Authority (NCA Kenya)",
+      "url": "https://www.nca.go.ke/",
+      "licence": "Government of Kenya Public Statutory Records",
+      "status": "draft"
+    }
+  ]
+}

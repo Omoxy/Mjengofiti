@@ -1,0 +1,252 @@
+openapi: 3.1.0
+info:
+  title: Mjengofiti Building Intelligence & Inspection Prioritisation API
+  version: 1.0.0
+  description: Production-grade REST API providing building intelligence, geospatial provenance, explainable screening indicators, and inspection case management for Nairobi County, Kenya.
+servers:
+  - url: http://localhost:8080
+    description: Local development environment
+paths:
+  /health/live:
+    get:
+      summary: Liveness probe
+      responses:
+        '200':
+          description: Service is alive
+  /health/ready:
+    get:
+      summary: Readiness probe
+      responses:
+        '200':
+          description: Service and database are ready
+        '503':
+          description: Database offline or service degraded
+  /api/v1/system/status:
+    get:
+      summary: System and dependencies diagnostic status
+      responses:
+        '200':
+          description: System status details
+  /api/v1/config/map:
+    get:
+      summary: MapLibre configuration and default center/zoom
+      responses:
+        '200':
+          description: Basemap and viewport configuration
+  /api/v1/boundaries:
+    get:
+      summary: Verified alternative Nairobi County ADM1 boundary GeoJSON
+      responses:
+        '200':
+          description: geoBoundaries Kenya ADM1 2020 GeoJSON FeatureCollection; not a statutory official boundary
+  /api/v1/coverage:
+    get:
+      summary: Building counts and spatial coverage summary
+      responses:
+        '200':
+          description: Summary of coverage and database status
+  /api/v1/buildings:
+    get:
+      summary: Query buildings within spatial bounding box or text query
+      parameters:
+        - name: bbox
+          in: query
+          schema:
+            type: string
+          description: minLng,minLat,maxLng,maxLat
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Text search query
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of buildings with geometry and data quality flags
+        '503':
+          description: PostGIS spatial database is offline
+  /api/v1/buildings/{id}:
+    get:
+      summary: Retrieve building detail with observations and indicators
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Complete building profile
+        '404':
+          description: Building not found
+  /api/v1/datasets:
+    get:
+      summary: List registered spatial and environmental datasets
+      responses:
+        '200':
+          description: List of datasets with provenance and license metadata
+  /api/v1/datasets/{id}:
+    get:
+      summary: Retrieve dataset details by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dataset metadata
+  /api/v1/datasets/{id}/versions:
+    get:
+      summary: List versions and validation reports for a dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Version history
+  /api/v1/indicators:
+    get:
+      summary: List codified screening indicators and methodologies
+      responses:
+        '200':
+          description: Indicator definitions, calculation methods, and limitations
+  /api/v1/indicators/{id}:
+    get:
+      summary: Retrieve specific indicator definition
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Indicator calculation details
+  /api/v1/analysis-jobs:
+    post:
+      summary: Queue indicator calculation job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                indicator_name:
+                  type: string
+      responses:
+        '202':
+          description: Job accepted and queued
+  /api/v1/inspection-cases:
+    get:
+      summary: List inspection referral queue
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Inspection cases
+    post:
+      summary: Create an inspection referral case
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - building_id
+                - title
+                - priority
+                - referral_reason
+              properties:
+                building_id:
+                  type: string
+                title:
+                  type: string
+                description:
+                  type: string
+                priority:
+                  type: string
+                  enum: [low, medium, high, critical]
+                referral_reason:
+                  type: string
+      responses:
+        '201':
+          description: Case created
+  /api/v1/inspection-cases/{id}:
+    get:
+      summary: Retrieve case details and evidence references
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Case details
+    patch:
+      summary: Update case status (enforcing state machine constraints)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Status updated
+        '400':
+          description: Invalid transition
+  /api/v1/standards:
+    get:
+      summary: List verified Kenyan building standards and statutory codes
+      responses:
+        '200':
+          description: Standards register
+  /api/v1/audit-events:
+    get:
+      summary: Retrieve immutable security and operational audit trail
+      responses:
+        '200':
+          description: Audit events list
+  /api/v1/auth/me:
+    get:
+      summary: Current authenticated user session and permissions
+      responses:
+        '200':
+          description: Active user profile
+  /api/v1/auth/roles:
+    get:
+      summary: List all RBAC roles and permission definitions
+      responses:
+        '200':
+          description: Available roles

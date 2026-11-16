@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build output
+dist/
+build/
+apps/api/bin/
+coverage/
+playwright-report/
+test-results/
+/screenshots/
+apps/web/screenshots/
+
+# Environment
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+.envrc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+tmp/
+*.tmp
+
+# Logs
+*.log
+logs/
+
+# Test coverage
+*.lcov
+
+# Docker volumes
+pgdata/
+postgres-data/
+
+# Local database exports and files
+*.dump
+*.backup
+*.sql.gz
+*.sql.zip
+*.sqlite
+*.sqlite3
+*.db
+
+# Data downloads (large files)
+data/downloads/
+
+# Binary builds
+*.exe
+*.dll
+*.so
+*.dylib
