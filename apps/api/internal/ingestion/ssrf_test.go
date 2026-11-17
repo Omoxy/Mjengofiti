@@ -190,18 +190,45 @@ func TestReadLimitedPayload_StreamingSizeEnforcement(t *testing.T) {
 func TestSafeHTTPClient_ConnectTimeSSRFRejection(t *testing.T) {
 	client := ingestion.NewSafeHTTPClient(2 * time.Second)
 
-	// Test connecting directly to loopback IP (should be rejected at dial time)
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://127.0.0.1:9999/test", nil)
-	if err != nil {
-		t.Fatalf("creating request: %v", err)
+	testCases := []struct {
+		name      string
+		targetURL string
+	}{
+		{"IPv4 Loopback Standard", "http://127.0.0.1:9999/test"},
+		{"IPv4 Loopback Subnet", "http://127.0.0.42:9999/test"},
+		{"IPv6 Loopback", "http://[::1]:9999/test"},
+		{"RFC 1918 Class A Private", "http://10.0.0.1:8080/data"},
+		{"RFC 1918 Class B Private", "http://172.16.0.1:8080/data"},
+		{"RFC 1918 Class C Private", "http://192.168.1.1:8080/data"},
+		{"AWS GCP Cloud Metadata", "http://169.254.169.254/latest/meta-data"},
+		{"IPv4 Link Local Address", "http://169.254.1.1:80/data"},
+		{"IPv6 Link Local Address", "http://[fe80::1]:80/data"},
+		{"Carrier Grade NAT RFC 6598", "http://100.64.0.1:80/data"},
+		{"Decimal Encoded Loopback", "http://2130706433:80/test"},
+		{"Hex Encoded Loopback", "http://0x7f000001:80/test"},
+		{"Octal Dotted Loopback", "http://0177.0.0.1:80/test"},
+		{"Decimal Encoded Metadata", "http://2852039166:80/test"},
+		{"Prohibited PostgreSQL Port", "http://example.com:5432/data"},
+		{"Prohibited SSH Port", "http://example.com:22/data"},
+		{"Prohibited Redis Port", "http://example.com:6379/data"},
+		{"Prohibited Docker Daemon Port", "http://example.com:2375/data"},
 	}
 
-	_, err = client.Do(req)
-	if err == nil {
-		t.Fatal("expected SafeHTTPClient to reject connection to 127.0.0.1, but it succeeded")
-	}
-	if !strings.Contains(err.Error(), "SSRF prevention") {
-		t.Errorf("expected SSRF prevention error, got: %v", err)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, tc.targetURL, nil)
+			if err != nil {
+				t.Fatalf("creating request: %v", err)
+			}
+
+			_, err = client.Do(req)
+			if err == nil {
+				t.Fatalf("expected SafeHTTPClient to reject connection to %s, but it succeeded", tc.targetURL)
+			}
+			if !strings.Contains(err.Error(), "SSRF prevention") {
+				t.Errorf("expected SSRF prevention error for %s, got: %v", tc.targetURL, err)
+			}
+		})
 	}
 }
 

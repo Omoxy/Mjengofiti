@@ -1,5 +1,5 @@
-﻿# Multi stage build for Mjengofiti Go API
-FROM golang:1.26.1-alpine AS builder
+# Multi stage build for Mjengofiti Go API
+FROM golang:1.26.11-alpine AS builder
 
 WORKDIR /app
 

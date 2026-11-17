@@ -1,4 +1,4 @@
-﻿package ingestion_test
+package ingestion_test
 
 import (
 	"context"
@@ -418,22 +418,36 @@ func TestAcquireSource_SSRFProtection(t *testing.T) {
 	logger := newTestLogger()
 	svc := ingestion.NewService(nil, logger)
 
-	// Register a malicious source targeting local host
-	maliciousSource := ingestion.Source{
-		ID:          "src-malicious-local",
-		Name:        "Local Host Target",
-		SourceURL:   "http://127.0.0.1:8080/data.json",
-		Format:      "geojson",
-		ExpectedCRS: "EPSG:4326",
+	testCases := []struct {
+		id        string
+		name      string
+		targetURL string
+	}{
+		{"src-malicious-local", "Local Host Loopback Target", "http://127.0.0.1:8080/data.json"},
+		{"src-malicious-meta", "Cloud Metadata Target", "http://169.254.169.254/latest/meta-data"},
+		{"src-malicious-priv", "RFC 1918 Private Target", "http://10.0.0.1:8080/data.json"},
 	}
 
-	_, err := svc.RegisterSource(maliciousSource)
-	if err != nil {
-		t.Fatalf("failed to register source: %v", err)
-	}
+	for _, tc := range testCases {
+		source := ingestion.Source{
+			ID:          tc.id,
+			Name:        tc.name,
+			SourceURL:   tc.targetURL,
+			Format:      "geojson",
+			ExpectedCRS: "EPSG:4326",
+		}
 
-	_, err = svc.AcquireSource(ctx, "src-malicious-local", "ver-ssrf-test")
-	if err == nil {
-		t.Fatal("expected AcquireSource to reject 127.0.0.1 with SSRF error, but it succeeded")
+		_, err := svc.RegisterSource(source)
+		if err != nil {
+			t.Fatalf("failed to register source %s: %v", tc.id, err)
+		}
+
+		_, err = svc.AcquireSource(ctx, tc.id, "ver-ssrf-test")
+		if err == nil {
+			t.Fatalf("expected AcquireSource to reject %s with SSRF error, but it succeeded", tc.targetURL)
+		}
+		if !strings.Contains(err.Error(), "SSRF prevention") && !strings.Contains(err.Error(), "insecure source URL") {
+			t.Errorf("expected SSRF error substring for %s, got: %v", tc.targetURL, err)
+		}
 	}
 }

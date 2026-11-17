@@ -1,0 +1,8 @@
+# Gitleaks ignore list for synthetic test fixtures in unit tests
+# Fingerprint format: <commit>:<file>:<rule>:<line>
+
+370b14172edfe2aadad10f00cd6ab962a59a77a5:apps/api/internal/auth/auth_test.go:generic-api-key:18
+370b14172edfe2aadad10f00cd6ab962a59a77a5:apps/api/internal/config/config_test.go:generic-api-key:61
+370b14172edfe2aadad10f00cd6ab962a59a77a5:apps/api/internal/config/config_test.go:generic-api-key:67
+370b14172edfe2aadad10f00cd6ab962a59a77a5:apps/api/internal/config/config_test.go:generic-api-key:76
+370b14172edfe2aadad10f00cd6ab962a59a77a5:apps/api/internal/config/config_test.go:generic-api-key:102
